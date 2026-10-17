@@ -6,92 +6,112 @@
   <title>Neo Perreo Berlin</title>
   <meta name="theme-color" content="#0a0a0a">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body { min-height: 100%; }
-
-    body {
-      background-color: #0a0a0a;
-      background-image: url("Background_Pattern.png");
-      background-repeat: repeat;
-      background-position: top center;
-      display: flex;
-      justify-content: center;
+    :root {
+      --bg: #0a0a0a;
+      /* content width: full screen on phones, capped on desktop */
+      --w: min(100vw, 520px);
     }
 
-    main {
-      width: 100%;
-      max-width: 520px;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { min-height: 100%; background: var(--bg); }
+
+    body {
       min-height: 100vh;
       min-height: 100dvh;
-      padding: 56px 24px 64px;
       display: flex;
       flex-direction: column;
-      align-items: center;
+    }
+
+    /* Plain dark band behind the logo (pattern starts below it) */
+    header {
+      position: relative;
+      z-index: 2;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      padding: calc(var(--w) * 0.07) 0 calc(var(--w) * 0.065);
     }
 
     .logo {
       display: block;
-      width: min(78%, 360px);
+      width: calc(var(--w) * 0.56);
       height: auto;
-      margin-bottom: clamp(48px, 11vh, 110px);
     }
 
-    .links {
-      width: 100%;
+    /* Pattern area with the buttons */
+    main {
+      position: relative;
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(28px, 6vh, 52px);
+      gap: calc(var(--w) * 0.14);
+      padding: calc(var(--w) * 0.24) 0 calc(var(--w) * 0.2);
+      overflow: hidden;
     }
 
-    .links a {
+    /* Black line art turned into faint grey lines on the dark background */
+    main::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("Background_Pattern.png");
+      background-repeat: repeat;
+      background-position: top center;
+      background-size: calc(var(--w) * 1.45) auto;
+      filter: invert(1);
+      opacity: 0.09;
+      pointer-events: none;
+    }
+
+    main a {
+      position: relative;
       display: block;
-      width: 100%;
-      border-radius: 8px;
+      width: calc(var(--w) * 0.8);
       transition: transform 0.15s ease;
     }
 
-    .links a:hover { transform: scale(1.04); }
-    .links a:active { transform: scale(0.97); }
+    main a:hover { transform: scale(1.04); }
+    main a:active { transform: scale(0.97); }
 
-    .links a:focus-visible {
+    main a:focus-visible {
       outline: 3px solid #6cf24a;
       outline-offset: 6px;
     }
 
-    .links img {
+    main a img {
       display: block;
       width: 100%;
       height: auto;
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .links a { transition: none; }
-      .links a:hover, .links a:active { transform: none; }
+      main a { transition: none; }
+      main a:hover, main a:active { transform: none; }
     }
   </style>
 </head>
 <body>
-  <main>
+  <header>
     <img class="logo" src="NP_Logo.png" alt="Neo Perreo Berlin">
+  </header>
 
-    <nav class="links" aria-label="Neo Perreo links">
-      <!-- TODO: swap in the real ticket platform link when ready -->
-      <a href="https://www.ticketmaster.de" target="_blank" rel="noopener">
-        <img src="Buy_Tickets_Box.png" alt="Buy Tickets">
-      </a>
+  <main>
+    <!-- TODO: swap in the real ticket platform link when ready -->
+    <a href="https://www.ticketmaster.de" target="_blank" rel="noopener">
+      <img src="Buy_Tickets_Box.png" alt="Buy Tickets">
+    </a>
 
-      <!-- TODO: replace with your real Instagram URL -->
-      <a href="https://www.instagram.com/" target="_blank" rel="noopener">
-        <img src="Insta_Box.png" alt="Instagram">
-      </a>
+    <!-- TODO: replace with your real Instagram URL -->
+    <a href="https://www.instagram.com/" target="_blank" rel="noopener">
+      <img src="Insta_Box.png" alt="Instagram">
+    </a>
 
-      <!-- TODO: replace with your real TikTok URL -->
-      <a href="https://www.tiktok.com/" target="_blank" rel="noopener">
-        <img src="TikTok_Box.png" alt="TikTok">
-      </a>
-    </nav>
+    <!-- TODO: replace with your real TikTok URL -->
+    <a href="https://www.tiktok.com/" target="_blank" rel="noopener">
+      <img src="TikTok_Box.png" alt="TikTok">
+    </a>
   </main>
 </body>
 </html>
