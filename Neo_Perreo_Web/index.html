@@ -137,7 +137,10 @@
     .game {
       display: none;
       position: relative;
-      width: calc(var(--w) * 0.86);
+      /* Almost full width; covers Insta, TikTok and the bone button */
+      width: calc(var(--w) * 0.98);
+      margin-top: calc(var(--w) * -0.11);
+      margin-bottom: calc(var(--w) * -0.078);
       background: rgba(10, 10, 10, 0.94);
       border: 3px solid #e833b4;
       border-radius: 8px;
@@ -146,6 +149,7 @@
 
     main.playing .social { display: none; }
     main.playing .game { display: block; }
+    main.playing #bone-btn { display: none; }
 
     .game canvas {
       display: block;
@@ -268,19 +272,21 @@
     const PINK = '#e833b4', GREEN = '#6cf24a', ORANGE = '#f0602d', DARK = '#0a0a0a';
 
     /* ------------------------------------------------------------------
-       SPRITES  (placeholders for now)
-       To use real artwork later: put the PNG in this folder and set `src`.
-       For an animated sheet (frames side by side, left to right) also set
-       `frames` and `fps`. w/h = size on screen in game units.
-       Until `src` is set (or if it fails to load) a placeholder is drawn.
+       SPRITES  (all PNGs live in Game_Sprites/)
+       w/h  = size in game units (game is 600 units wide)
+       frames/fps = animated sheet (frames side by side)
+       crop = [x, y, w, h] part of the PNG to use (trims transparent margins)
+       If a file is missing, a simple placeholder shape is drawn instead.
        ------------------------------------------------------------------ */
     const SPRITES = {
-      // Dog: 6-frame sheets (frames side by side). Frame is 137x107 px -> drawn at 106x83 game units.
       playerRun:  { src: 'Game_Sprites/Dog_Run.png',  w: 106, h: 83, frames: 6, fps: 8.33 },
       playerJump: { src: 'Game_Sprites/Dog_Jump.png', w: 106, h: 83, frames: 6, fps: 8.33 },
+      bone:       { src: 'Game_Sprites/Bone.png', crop: [178, 284, 1306, 417], w: 84, h: 27 },
+      beer:       { src: 'Game_Sprites/Beer.png', crop: [189, 236, 446, 1356], w: 22, h: 67 },
+      zaza:       { src: 'Game_Sprites/Zaza.png', crop: [369, 97, 1232, 743],  w: 66, h: 40 },
       // Obstacles are still placeholders (set src to use real artwork)
-      obstacleS:  { src: null, w: 34, h: 46, frames: 1, fps: 1 },
-      obstacleL:  { src: null, w: 44, h: 66, frames: 1, fps: 1 }
+      obstacleS:  { src: null, w: 34, h: 46 },
+      obstacleL:  { src: null, w: 44, h: 66 }
     };
     // How much of the dog's box counts for collisions (forgiving)
     const HIT = { x: 0.25, top: 0.2 };
@@ -294,16 +300,27 @@
       }
     }
 
-    function drawSprite(name, x, y, t, onGround, frame) {
+    function drawSprite(name, x, y, t, onGround, frame, rot) {
       const spr = SPRITES[name];
-      if (spr.img) {
-        const fw = spr.img.naturalWidth / spr.frames;
-        const f = frame !== undefined ? Math.min(frame, spr.frames - 1)
-                : spr.frames > 1 ? Math.floor(t * spr.fps) % spr.frames : 0;
-        ctx.drawImage(spr.img, f * fw, 0, fw, spr.img.naturalHeight, x, y, spr.w, spr.h);
-        return;
+      if (rot) {
+        ctx.save();
+        ctx.translate(x + spr.w / 2, y + spr.h / 2);
+        ctx.rotate(rot);
+        x = -spr.w / 2; y = -spr.h / 2;
       }
-      PLACEHOLDERS[name](x, y, spr.w, spr.h, t, onGround);
+      if (spr.img && spr.crop) {
+        const c = spr.crop;
+        ctx.drawImage(spr.img, c[0], c[1], c[2], c[3], x, y, spr.w, spr.h);
+      } else if (spr.img) {
+        const frames = spr.frames || 1;
+        const fw = spr.img.naturalWidth / frames;
+        const f = frame !== undefined ? Math.min(frame, frames - 1)
+                : frames > 1 ? Math.floor(t * spr.fps) % frames : 0;
+        ctx.drawImage(spr.img, f * fw, 0, fw, spr.img.naturalHeight, x, y, spr.w, spr.h);
+      } else {
+        PLACEHOLDERS[name](x, y, spr.w, spr.h, t, onGround);
+      }
+      if (rot) ctx.restore();
     }
 
     const PLACEHOLDERS = {
@@ -311,17 +328,20 @@
       playerRun(x, y, w, h, t, onGround) {
         const step = onGround && Math.floor(t * 10) % 2 === 0;
         ctx.fillStyle = PINK;
-        ctx.fillRect(x + 4, y + h * 0.25, w * 0.7, h * 0.45);            // body
-        ctx.fillRect(x + w * 0.55, y, w * 0.45, h * 0.4);                 // head
-        ctx.fillRect(x, y + h * 0.2, 8, 8);                               // tail
+        ctx.fillRect(x + 4, y + h * 0.25, w * 0.7, h * 0.45);
+        ctx.fillRect(x + w * 0.55, y, w * 0.45, h * 0.4);
+        ctx.fillRect(x, y + h * 0.2, 8, 8);
         ctx.fillStyle = ORANGE;
-        ctx.fillRect(x + w * 0.58, y - 6, 8, 10);                         // ear
+        ctx.fillRect(x + w * 0.58, y - 6, 8, 10);
         ctx.fillStyle = DARK;
-        ctx.fillRect(x + w * 0.82, y + 8, 5, 5);                          // eye
+        ctx.fillRect(x + w * 0.82, y + 8, 5, 5);
         ctx.fillStyle = PINK;
-        ctx.fillRect(x + 8,  y + h * 0.7, 8, h * 0.3 - (step ? 5 : 0));   // legs
+        ctx.fillRect(x + 8, y + h * 0.7, 8, h * 0.3 - (step ? 5 : 0));
         ctx.fillRect(x + w * 0.55, y + h * 0.7, 8, h * 0.3 - (step ? 0 : 5));
       },
+      bone(x, y, w, h)  { ctx.fillStyle = ORANGE; ctx.fillRect(x, y, w, h); },
+      beer(x, y, w, h)  { ctx.fillStyle = '#a55000'; ctx.fillRect(x, y, w, h); },
+      zaza(x, y, w, h)  { ctx.fillStyle = '#f6efe0'; ctx.fillRect(x, y, w, h); },
       obstacleS(x, y, w, h) {
         ctx.fillStyle = ORANGE;
         ctx.fillRect(x, y + 8, w, h - 8);
@@ -339,21 +359,32 @@
 
     /* ---------------------------- game state --------------------------- */
     const LW = 600;               // logical width; height follows the box shape
-    let LH = 300, groundY = 254, ratio = 0.55;
-    let isOpen = false, state = 'ready', raf = 0, last = 0;
-    let t = 0, speed = 0, distance = 0, nextGap = 0, overAt = 0;
-    let hi = 0;
+    let LH = 400, groundY = 354, ratio = 0.73;
+    let isOpen = false, state = 'intro', raf = 0, last = 0;
+    let t = 0, speed = 0, distance = 0, nextGap = 0, nextItem = 0, overAt = 0;
+    let introT = 0, bonus = 0, hi = 0, tapHintDone = false;
     try { hi = parseInt(localStorage.getItem('np-hi') || '0', 10) || 0; } catch (e) {}
 
-    const player = { x: 50, y: 0, vy: 0, air: 0 };
-    let obstacles = [];
-
+    const INTRO_DUR = 0.8;        // seconds the bone is on screen (first pixel in -> last pixel out)
+    const BONE_SPIN = 11;         // radians per second
     const GRAVITY = 1800, JUMP_V = -620;
 
+    const player = { x: 50, y: 0, vy: 0, air: 0 };
+    let obstacles = [], items = [], pops = [];
+
+    const score = () => Math.floor(distance / 12) + bonus;
+
     function resetGame() {
-      t = 0; distance = 0; speed = 280; obstacles = [];
-      nextGap = 420;
+      t = 0; distance = 0; speed = 280; bonus = 0;
+      obstacles = []; items = []; pops = [];
+      nextGap = 420; nextItem = 320;
       player.y = groundY - SPRITES.playerRun.h; player.vy = 0; player.air = 0;
+    }
+
+    function startRound() {       // bone throw -> dog runs
+      resetGame();
+      state = 'intro';
+      introT = 0;
     }
 
     function fit() {
@@ -365,21 +396,28 @@
       canvas.height = Math.round(ch * dpr);
       const sc = cw / LW;
       LH = ch / sc;
-      groundY = LH - 46;
       ctx.setTransform(dpr * sc, 0, 0, dpr * sc, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
       if (state !== 'running') player.y = groundY - SPRITES.playerRun.h;
     }
 
     function openGame() {
       if (isOpen) return;
-      const socialH = social.offsetHeight;          // keep the page height the same
+      const socialH = social.offsetHeight;
+      // Everything from the top of Insta to the bottom of the bone button gets covered
+      const spanH = boneBtn.offsetTop + boneBtn.offsetHeight - social.offsetTop;
       main.classList.add('playing');
       const boxW = gameBox.clientWidth;
-      ratio = Math.max(0.45, socialH / boxW);
+      const wpx = boxW / 0.98;
+      // window = covered span + 0.188w (see margins of .game in the CSS)
+      ratio = (spanH + 0.188 * wpx) / boxW;
+      // the ground line stays exactly where it was in the previous, smaller window;
+      // everything below it is new ground (space to tap)
+      groundY = LW * (socialH + 0.22 * wpx) / boxW - 46;
       isOpen = true;
-      state = 'ready';
       fit();
-      resetGame();
+      startRound();
       canvas.focus({ preventScroll: true });
       last = performance.now();
       raf = requestAnimationFrame(loop);
@@ -398,63 +436,109 @@
 
     function action() {
       if (!isOpen) return;
-      if (state === 'ready') {
-        state = 'running';
-        player.vy = JUMP_V;
-      } else if (state === 'running') {
-        if (onGround()) player.vy = JUMP_V;
+      if (state === 'running') {
+        if (onGround()) { player.vy = JUMP_V; tapHintDone = true; }
       } else if (state === 'over' && performance.now() - overAt > 350) {
-        resetGame();
-        state = 'running';
-        player.vy = JUMP_V;
+        startRound();
       }
     }
 
     function die() {
       state = 'over';
       overAt = performance.now();
-      const score = Math.floor(distance / 12);
-      if (score > hi) {
-        hi = score;
+      if (score() > hi) {
+        hi = score();
         try { localStorage.setItem('np-hi', String(hi)); } catch (e) {}
       }
     }
 
+    function updatePops(dt) {
+      for (const p of pops) { p.y -= 45 * dt; p.life -= dt; }
+      pops = pops.filter(p => p.life > 0);
+    }
+
     function update(dt) {
       t += dt;
-      if (state !== 'running') return;
+
+      if (state === 'intro') {
+        introT += dt;
+        if (introT >= INTRO_DUR) state = 'running';
+        return;
+      }
+      if (state === 'over') { updatePops(dt); return; }
 
       speed = Math.min(280 + t * 8, 560);
       distance += speed * dt;
 
-      // player physics
-      const floorY = groundY - SPRITES.playerRun.h;
+      // dog physics
+      const P = SPRITES.playerRun;
+      const floorY = groundY - P.h;
       player.vy += GRAVITY * dt;
       player.y += player.vy * dt;
       if (player.y >= floorY) { player.y = floorY; player.vy = 0; player.air = 0; }
       else player.air += dt;
 
-      // obstacles
+      // move things
       for (const o of obstacles) o.x -= speed * dt;
+      for (const it of items) it.x -= speed * dt;
       obstacles = obstacles.filter(o => o.x + o.w > -20);
+      items = items.filter(it => it.x + it.w > -20);
+      updatePops(dt);
 
+      // spawn obstacles (not right next to a fresh pickup)
       nextGap -= speed * dt;
       if (nextGap <= 0) {
-        const name = Math.random() < 0.6 ? 'obstacleS' : 'obstacleL';
-        const sp = SPRITES[name];
-        obstacles.push({ name, x: LW + 20, w: sp.w, h: sp.h });
-        const min = speed * 0.85 + 140, max = speed * 1.5 + 260;
-        nextGap = min + Math.random() * (max - min);
+        if (items.some(it => it.x > LW - 220)) {
+          nextGap = 60;
+        } else {
+          const name = Math.random() < 0.6 ? 'obstacleS' : 'obstacleL';
+          const sp = SPRITES[name];
+          obstacles.push({ name, x: LW + 20, w: sp.w, h: sp.h });
+          const min = speed * 0.85 + 140, max = speed * 1.5 + 260;
+          nextGap = min + Math.random() * (max - min);
+        }
       }
 
-      // collisions (slightly forgiving boxes)
-      const P = SPRITES.playerRun;
+      // spawn pickups: beer (+50) and zaza (+100) at random heights, in random gaps,
+      // sometimes as a little trail of 2-3
+      nextItem -= speed * dt;
+      if (nextItem <= 0) {
+        if (obstacles.some(o => o.x > LW - 220)) {
+          nextItem = 60;
+        } else {
+          const name = Math.random() < 0.55 ? 'beer' : 'zaza';
+          const sp = SPRITES[name];
+          const r = Math.random();
+          const lift = r < 0.2 ? 4 : 4 + Math.random() * 150;      // ground .. top of jump
+          const count = Math.random() < 0.25 ? 2 + Math.floor(Math.random() * 2) : 1;
+          for (let i = 0; i < count; i++) {
+            const arc = count > 1 ? Math.sin((i / (count - 1)) * Math.PI) * 28 : 0;
+            items.push({ name, x: LW + 20 + i * (sp.w + 34), y: groundY - sp.h - lift - arc,
+                         w: sp.w, h: sp.h, pts: name === 'beer' ? 50 : 100 });
+          }
+          nextItem = speed * (0.3 + Math.random() * 2.0) + 90 + (count - 1) * 100;
+        }
+      }
+
+      // collisions with obstacles (slightly forgiving boxes)
       const px1 = player.x + P.w * HIT.x, px2 = player.x + P.w * (1 - HIT.x);
       const py1 = player.y + P.h * HIT.top, py2 = player.y + P.h;
       for (const o of obstacles) {
         const ox1 = o.x + 4, ox2 = o.x + o.w - 4;
         const oy1 = groundY - o.h + 4;
-        if (px2 > ox1 && px1 < ox2 && py2 > oy1) { die(); break; }
+        if (px2 > ox1 && px1 < ox2 && py2 > oy1) { die(); return; }
+      }
+
+      // collecting pickups (generous box)
+      const cx1 = player.x + P.w * 0.15, cx2 = player.x + P.w * 0.95;
+      const cy1 = player.y + P.h * 0.05, cy2 = player.y + P.h;
+      for (const it of items) {
+        if (cx2 > it.x && cx1 < it.x + it.w && cy2 > it.y && cy1 < it.y + it.h) {
+          it.x = -999;                       // removed on next filter
+          bonus += it.pts;
+          pops.push({ x: it.x === -999 ? player.x + P.w * 0.6 : it.x, y: player.y - 6,
+                      text: '+' + it.pts, life: 0.8, color: it.pts > 50 ? GREEN : ORANGE });
+        }
       }
     }
 
@@ -463,48 +547,143 @@
     function draw() {
       ctx.clearRect(0, 0, LW, LH);
 
-      // ground line with moving dashes
+      // ground line (unchanged) ...
       ctx.fillStyle = PINK;
       ctx.fillRect(0, groundY, LW, 3);
-      ctx.fillStyle = 'rgba(232,51,180,0.45)';
-      const off = (distance * 1) % 40;
-      for (let x = -off; x < LW; x += 40) ctx.fillRect(x, groundY + 10, 14, 3);
+      // ... and extended ground below it, with the same kind of dashes
+      const below = LH - groundY - 3;
+      const grd = ctx.createLinearGradient(0, groundY + 3, 0, LH);
+      grd.addColorStop(0, 'rgba(232,51,180,0.16)');
+      grd.addColorStop(1, 'rgba(232,51,180,0.04)');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, groundY + 3, LW, below);
+      const rows = [
+        { dy: 10,  len: 14, gap: 26,  k: 1,    a: 0.45 },
+        { dy: 36,  len: 24, gap: 52,  k: 0.8,  a: 0.30 },
+        { dy: 70,  len: 34, gap: 90,  k: 0.65, a: 0.22 },
+        { dy: 112, len: 48, gap: 140, k: 0.5,  a: 0.16 },
+        { dy: 160, len: 60, gap: 190, k: 0.4,  a: 0.12 }
+      ];
+      for (const r of rows) {
+        if (r.dy > below - 8) continue;
+        ctx.fillStyle = 'rgba(232,51,180,' + r.a + ')';
+        const period = r.len + r.gap;
+        const o = (distance * r.k) % period;
+        for (let x = -o; x < LW; x += period) ctx.fillRect(x, groundY + r.dy, r.len, 3);
+      }
 
       for (const o of obstacles) drawSprite(o.name, o.x, groundY - o.h, t, false);
+      for (const it of items) if (it.x > -900) drawSprite(it.name, it.x, it.y, t, false);
+
+      // dog
       if (state === 'running' && !onGround()) {
-        // jump animation plays once over the airtime (crouch -> leap)
-        const f = Math.floor(player.air * SPRITES.playerJump.fps);
+        const f = Math.floor(player.air * SPRITES.playerJump.fps);   // plays once per jump
         drawSprite('playerJump', player.x, player.y, t, false, f);
       } else if (state === 'running') {
         drawSprite('playerRun', player.x, player.y, t, true);
       } else {
-        drawSprite('playerRun', player.x, player.y, t, false, 0);   // standing frame
+        drawSprite('playerRun', player.x, player.y, t, false, 0);    // standing frame
       }
+
+      // the thrown bone: flies in from the left, spinning, to the right
+      if (state === 'intro') {
+        const p = Math.min(introT / INTRO_DUR, 1);
+        const B = SPRITES.bone;
+        const bx = -B.w + p * (LW + B.w);
+        const by = groundY - 170 - 80 * Math.sin(Math.PI * p);
+        drawSprite('bone', bx, by, t, false, undefined, introT * BONE_SPIN);
+      }
+
+      // "+50" pop-ups
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '700 20px ui-monospace, Menlo, Consolas, monospace';
+      for (const p of pops) {
+        ctx.globalAlpha = Math.min(1, p.life / 0.4);
+        ctx.fillStyle = p.color;
+        ctx.fillText(p.text, p.x, p.y);
+      }
+      ctx.globalAlpha = 1;
+
+      // pixel hand showing where to tap (until the first jump)
+      if (!tapHintDone && state !== 'over') drawTapHint();
 
       // HUD
       ctx.font = '700 16px ui-monospace, Menlo, Consolas, monospace';
       ctx.textBaseline = 'top';
       ctx.textAlign = 'left';
       ctx.fillStyle = GREEN;
-      ctx.fillText(pad(Math.floor(distance / 12)), 14, 12);
+      ctx.fillText(pad(score()), 14, 12);
       ctx.fillStyle = 'rgba(108,242,74,0.55)';
       ctx.fillText('HI ' + pad(hi), 14, 34);
 
       // messages
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      if (state === 'ready') {
-        ctx.fillStyle = GREEN;
-        ctx.font = '700 20px ui-monospace, Menlo, Consolas, monospace';
-        ctx.fillText('TAP / SPACE TO START', LW / 2, LH * 0.38);
+      if (state === 'intro') {
+        ctx.fillStyle = PINK;
+        ctx.font = '700 30px ui-monospace, Menlo, Consolas, monospace';
+        ctx.fillText('FETCH!', LW / 2, LH * 0.3);
       } else if (state === 'over') {
         ctx.fillStyle = PINK;
         ctx.font = '700 30px ui-monospace, Menlo, Consolas, monospace';
-        ctx.fillText('GAME OVER', LW / 2, LH * 0.34);
+        ctx.fillText('GAME OVER', LW / 2, LH * 0.3);
         ctx.fillStyle = GREEN;
         ctx.font = '700 16px ui-monospace, Menlo, Consolas, monospace';
-        ctx.fillText('TAP / SPACE TO RETRY', LW / 2, LH * 0.34 + 36);
+        ctx.fillText('TAP / SPACE TO RETRY', LW / 2, LH * 0.3 + 36);
       }
+    }
+
+
+    /* Pixel hand that taps the ground area */
+    const HAND = [
+      '....oo.......',
+      '...offo......',
+      '...offo......',
+      '...offo......',
+      '...offooo....',
+      '...offoffoo..',
+      '...offoffofo.',
+      'oo.offffffffo',
+      'ofoofffffffo.',
+      '.offfffffffo.',
+      '..offfffffo..',
+      '..offfffffo..',
+      '...offfffo...',
+      '...ooooooo...'
+    ];
+    function drawTapHint() {
+      const U = 4;                                   // size of one hand pixel
+      const cx = LW / 2;
+      const tipY = groundY + Math.min(95, (LH - groundY) * 0.42);   // fingertip rest position
+      const cycle = (t % 1.1) / 1.1;                 // 0..1
+      const press = cycle < 0.18 ? cycle / 0.18 : cycle < 0.3 ? 1 - (cycle - 0.18) / 0.12 : 0;
+      const dip = Math.round(press * 3) * U;         // pixel-snapped tap movement
+      const hx = Math.round((cx - 4.5 * U) / U) * U;
+      const hy = Math.round((tipY + dip) / U) * U;
+
+      // ripple at the fingertip
+      if (cycle > 0.17 && cycle < 0.75) {
+        const k = (cycle - 0.17) / 0.58;
+        ctx.strokeStyle = 'rgba(108,242,74,' + (0.9 * (1 - k)) + ')';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(cx, tipY + 3 * U, 8 + k * 30, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      for (let r = 0; r < HAND.length; r++) {
+        for (let c = 0; c < HAND[r].length; c++) {
+          const ch = HAND[r][c];
+          if (ch === '.') continue;
+          ctx.fillStyle = ch === 'o' ? PINK : '#f6efe0';
+          ctx.fillRect(hx + c * U, hy + r * U, U, U);
+        }
+      }
+      ctx.fillStyle = GREEN;
+      ctx.font = '700 14px ui-monospace, Menlo, Consolas, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText('TAP TO JUMP', cx, hy + HAND.length * U + 10);
     }
 
     function loop(now) {
@@ -526,7 +705,7 @@
       if (!isOpen) return;
       if (e.code === 'Escape') { closeGame(); return; }
       if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
-        if (document.activeElement === closeBtn && e.code === 'Space') return; // let the button work
+        if (document.activeElement === closeBtn && e.code === 'Space') return;
         e.preventDefault();
         if (!e.repeat) action();
       }
