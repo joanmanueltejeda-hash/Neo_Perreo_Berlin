@@ -68,7 +68,7 @@
       flex-direction: column;
       align-items: center;
       gap: calc(var(--w) * 0.14);
-      padding: calc(var(--w) * 0.16) 0 calc(var(--w) * 0.23);
+      padding: calc(var(--w) * 0.16) 0 calc(var(--w) * 0.05);
       overflow: hidden;
     }
 
@@ -90,35 +90,60 @@
       pointer-events: none;
     }
 
-    main a {
+    main > a {
       position: relative;
       display: block;
-      width: calc(var(--w) * 0.8);
+      width: calc(var(--w) * 0.4);
       transition: transform 0.15s ease;
     }
 
-    main a:hover { transform: scale(1.04); }
-    main a:active { transform: scale(0.97); }
+    main > a:hover { transform: scale(1.04); }
+    main > a:active { transform: scale(0.97); }
 
-    main a:focus-visible {
+    main > a:focus-visible {
       outline: 3px solid #6cf24a;
       outline-offset: 6px;
     }
 
-    main a img {
+    main > a img {
       display: block;
       width: 100%;
       height: auto;
     }
 
-    /* Desktop: same layout, buttons at half size */
-    @media (min-width: 900px) {
-      main a { width: calc(var(--w) * 0.4); }
+    /* Footer */
+    footer {
+      position: relative;
+      margin-top: auto;
+      padding: calc(var(--w) * 0.12) 20px 0;
+      text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.8;
+      color: #7a7a7a;
     }
 
+    footer nav a {
+      display: inline;
+      width: auto;
+      color: #9a9a9a;
+      text-decoration: none;
+      padding: 4px 2px;
+      transition: color 0.15s ease;
+    }
+
+    footer nav a:hover { color: #e833b4; }
+
+    footer nav a:focus-visible {
+      outline: 2px solid #6cf24a;
+      outline-offset: 2px;
+    }
+
+    footer .sep { margin: 0 8px; color: #4a4a4a; }
+
     @media (prefers-reduced-motion: reduce) {
-      main a { transition: none; }
-      main a:hover, main a:active { transform: none; }
+      main > a { transition: none; }
+      main > a:hover, main > a:active { transform: none; }
     }
   </style>
 </head>
@@ -142,6 +167,13 @@
     <a href="https://www.tiktok.com/" target="_blank" rel="noopener">
       <img src="TikTok_Box.png" alt="TikTok">
     </a>
+    <footer>
+      <nav aria-label="Legal">
+        <!-- TODO: point these at your real legal pages -->
+        <a href="impressum.html">Impressum</a><span class="sep">·</span><a href="datenschutz.html">Datenschutz</a><span class="sep">·</span><a href="kontakt.html">Kontakt</a>
+      </nav>
+      <p>&copy; 2026 Neo Perreo Berlin</p>
+    </footer>
   </main>
 </body>
 </html>
