@@ -32,10 +32,29 @@
       justify-content: center;
       align-items: flex-start;
       padding-top: calc(var(--w) * 0.10);
-      min-height: calc(var(--w) * 0.41);
+      min-height: calc(var(--w) * 0.415);
+      overflow: hidden;
+    }
+
+    /* Coloured pink-to-orange pattern band behind the logo */
+    header::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: var(--w);
+      transform: translateX(-50%);
+      background-image: url("Background_Pattern_Top.png");
+      background-repeat: no-repeat;
+      /* image has transparent margins; scale/shift so the artwork fills the band */
+      background-size: 101.76% auto;
+      background-position: 0 calc(var(--w) * -0.0583);
+      pointer-events: none;
     }
 
     .logo {
+      position: relative;
       display: block;
       width: calc(var(--w) * 0.57);
       height: auto;
@@ -57,7 +76,11 @@
     main::before {
       content: "";
       position: absolute;
-      inset: 0;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: var(--w);
+      transform: translateX(-50%);
       background-image: url("Background_Pattern.png");
       background-repeat: repeat;
       background-position: top center;
@@ -86,6 +109,11 @@
       display: block;
       width: 100%;
       height: auto;
+    }
+
+    /* Desktop: same layout, buttons at half size */
+    @media (min-width: 900px) {
+      main a { width: calc(var(--w) * 0.4); }
     }
 
     @media (prefers-reduced-motion: reduce) {
