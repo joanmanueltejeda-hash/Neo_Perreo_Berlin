@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Neo Perreo Berlin</title>
+  <meta name="theme-color" content="#0a0a0a">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      background-color: #0a0a0a;
+      background-image: url("Background_Pattern.png");
+      background-repeat: repeat;
+      background-position: top center;
+      display: flex;
+      justify-content: center;
+    }
+
+    main {
+      width: 100%;
+      max-width: 520px;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 56px 24px 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .logo {
+      display: block;
+      width: min(78%, 360px);
+      height: auto;
+      margin-bottom: clamp(48px, 11vh, 110px);
+    }
+
+    .links {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(28px, 6vh, 52px);
+    }
+
+    .links a {
+      display: block;
+      width: 100%;
+      border-radius: 8px;
+      transition: transform 0.15s ease;
+    }
+
+    .links a:hover { transform: scale(1.04); }
+    .links a:active { transform: scale(0.97); }
+
+    .links a:focus-visible {
+      outline: 3px solid #6cf24a;
+      outline-offset: 6px;
+    }
+
+    .links img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .links a { transition: none; }
+      .links a:hover, .links a:active { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <img class="logo" src="NP_Logo.png" alt="Neo Perreo Berlin">
+
+    <nav class="links" aria-label="Neo Perreo links">
+      <!-- TODO: swap in the real ticket platform link when ready -->
+      <a href="https://www.ticketmaster.de" target="_blank" rel="noopener">
+        <img src="Buy_Tickets_Box.png" alt="Buy Tickets">
+      </a>
+
+      <!-- TODO: replace with your real Instagram URL -->
+      <a href="https://www.instagram.com/" target="_blank" rel="noopener">
+        <img src="Insta_Box.png" alt="Instagram">
+      </a>
+
+      <!-- TODO: replace with your real TikTok URL -->
+      <a href="https://www.tiktok.com/" target="_blank" rel="noopener">
+        <img src="TikTok_Box.png" alt="TikTok">
+      </a>
+    </nav>
+  </main>
+</body>
+</html>
