@@ -90,26 +90,90 @@
       pointer-events: none;
     }
 
-    main > a {
+    /* Clickable image tiles (links + bone button) */
+    .tile {
       position: relative;
       display: block;
-      width: calc(var(--w) * 0.675);
       transition: transform 0.15s ease;
     }
 
-    main > a:hover { transform: scale(1.04); }
-    main > a:active { transform: scale(0.97); }
+    .tile:hover { transform: scale(1.04); }
+    .tile:active { transform: scale(0.97); }
 
-    main > a:focus-visible {
+    .tile:focus-visible {
       outline: 3px solid #6cf24a;
       outline-offset: 6px;
     }
 
-    main > a img {
+    .tile img {
       display: block;
       width: 100%;
       height: auto;
     }
+
+    .tile.wide { width: calc(var(--w) * 0.675); }
+
+    /* Bone button: half the size of the other buttons */
+    button.tile {
+      background: none;
+      border: 0;
+      padding: 0;
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+      width: calc(var(--w) * 0.3375);
+    }
+
+    /* Insta + TikTok live in one block so the game can take their place */
+    .social {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: calc(var(--w) * 0.14);
+    }
+
+    /* Game: replaces .social while playing */
+    .game {
+      display: none;
+      position: relative;
+      width: calc(var(--w) * 0.86);
+      background: rgba(10, 10, 10, 0.94);
+      border: 3px solid #e833b4;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    main.playing .social { display: none; }
+    main.playing .game { display: block; }
+
+    .game canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      outline: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .game-close {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      z-index: 2;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid #e833b4;
+      background: #0a0a0a;
+      color: #e833b4;
+      font: 700 14px/1 sans-serif;
+      cursor: pointer;
+    }
+
+    .game-close:hover { background: #e833b4; color: #0a0a0a; }
+    .game-close:focus-visible { outline: 2px solid #6cf24a; outline-offset: 2px; }
 
     /* Footer */
     footer {
@@ -142,8 +206,8 @@
     footer .sep { margin: 0 8px; color: #4a4a4a; }
 
     @media (prefers-reduced-motion: reduce) {
-      main > a { transition: none; }
-      main > a:hover, main > a:active { transform: none; }
+      .tile { transition: none; }
+      .tile:hover, .tile:active { transform: none; }
     }
   </style>
 </head>
@@ -154,19 +218,33 @@
 
   <main>
     <!-- TODO: swap in the real ticket platform link when ready -->
-    <a href="https://www.ticketmaster.de" target="_blank" rel="noopener">
+    <a class="tile wide" href="https://www.ticketmaster.de" target="_blank" rel="noopener">
       <img src="Buy_Tickets_Box.png" alt="Buy Tickets">
     </a>
 
-    <!-- TODO: replace with your real Instagram URL -->
-    <a href="https://www.instagram.com/" target="_blank" rel="noopener">
-      <img src="Insta_Box.png" alt="Instagram">
-    </a>
+    <div class="social" id="social">
+      <!-- TODO: replace with your real Instagram URL -->
+      <a class="tile wide" href="https://www.instagram.com/" target="_blank" rel="noopener">
+        <img src="Insta_Box.png" alt="Instagram">
+      </a>
 
-    <!-- TODO: replace with your real TikTok URL -->
-    <a href="https://www.tiktok.com/" target="_blank" rel="noopener">
-      <img src="TikTok_Box.png" alt="TikTok">
-    </a>
+      <!-- TODO: replace with your real TikTok URL -->
+      <a class="tile wide" href="https://www.tiktok.com/" target="_blank" rel="noopener">
+        <img src="TikTok_Box.png" alt="TikTok">
+      </a>
+    </div>
+
+    <!-- Jump & run: shown in place of Insta + TikTok -->
+    <div class="game" id="game">
+      <button class="game-close" id="game-close" type="button" aria-label="Close game">&#x2715;</button>
+      <canvas id="game-canvas" tabindex="0" role="img"
+              aria-label="Endless runner game. Tap or press space to jump over the obstacles."></canvas>
+    </div>
+
+    <button class="tile" id="bone-btn" type="button" aria-label="Click to throw bone (play the game)">
+      <img src="Bone_Button.png" alt="Click to throw bone">
+    </button>
+
     <footer>
       <nav aria-label="Legal">
         <!-- TODO: point these at your real legal pages -->
@@ -175,5 +253,287 @@
       <p>&copy; 2026 Neo Perreo Berlin</p>
     </footer>
   </main>
+  <script>
+  (() => {
+    'use strict';
+
+    const main     = document.querySelector('main');
+    const social   = document.getElementById('social');
+    const gameBox  = document.getElementById('game');
+    const canvas   = document.getElementById('game-canvas');
+    const ctx      = canvas.getContext('2d');
+    const boneBtn  = document.getElementById('bone-btn');
+    const closeBtn = document.getElementById('game-close');
+
+    const PINK = '#e833b4', GREEN = '#6cf24a', ORANGE = '#f0602d', DARK = '#0a0a0a';
+
+    /* ------------------------------------------------------------------
+       SPRITES  (placeholders for now)
+       To use real artwork later: put the PNG in this folder and set `src`.
+       For an animated sheet (frames side by side, left to right) also set
+       `frames` and `fps`. w/h = size on screen in game units.
+       Until `src` is set (or if it fails to load) a placeholder is drawn.
+       ------------------------------------------------------------------ */
+    const SPRITES = {
+      // Dog: 6-frame sheets (frames side by side). Frame is 137x107 px -> drawn at 106x83 game units.
+      playerRun:  { src: 'Game_Sprites/Dog_Run.png',  w: 106, h: 83, frames: 6, fps: 8.33 },
+      playerJump: { src: 'Game_Sprites/Dog_Jump.png', w: 106, h: 83, frames: 6, fps: 8.33 },
+      // Obstacles are still placeholders (set src to use real artwork)
+      obstacleS:  { src: null, w: 34, h: 46, frames: 1, fps: 1 },
+      obstacleL:  { src: null, w: 44, h: 66, frames: 1, fps: 1 }
+    };
+    // How much of the dog's box counts for collisions (forgiving)
+    const HIT = { x: 0.25, top: 0.2 };
+
+    for (const spr of Object.values(SPRITES)) {
+      spr.img = null;
+      if (spr.src) {
+        const img = new Image();
+        img.onload = () => { spr.img = img; };
+        img.src = spr.src;
+      }
+    }
+
+    function drawSprite(name, x, y, t, onGround, frame) {
+      const spr = SPRITES[name];
+      if (spr.img) {
+        const fw = spr.img.naturalWidth / spr.frames;
+        const f = frame !== undefined ? Math.min(frame, spr.frames - 1)
+                : spr.frames > 1 ? Math.floor(t * spr.fps) % spr.frames : 0;
+        ctx.drawImage(spr.img, f * fw, 0, fw, spr.img.naturalHeight, x, y, spr.w, spr.h);
+        return;
+      }
+      PLACEHOLDERS[name](x, y, spr.w, spr.h, t, onGround);
+    }
+
+    const PLACEHOLDERS = {
+      playerJump(x, y, w, h, t) { PLACEHOLDERS.playerRun(x, y, w, h, t, false); },
+      playerRun(x, y, w, h, t, onGround) {
+        const step = onGround && Math.floor(t * 10) % 2 === 0;
+        ctx.fillStyle = PINK;
+        ctx.fillRect(x + 4, y + h * 0.25, w * 0.7, h * 0.45);            // body
+        ctx.fillRect(x + w * 0.55, y, w * 0.45, h * 0.4);                 // head
+        ctx.fillRect(x, y + h * 0.2, 8, 8);                               // tail
+        ctx.fillStyle = ORANGE;
+        ctx.fillRect(x + w * 0.58, y - 6, 8, 10);                         // ear
+        ctx.fillStyle = DARK;
+        ctx.fillRect(x + w * 0.82, y + 8, 5, 5);                          // eye
+        ctx.fillStyle = PINK;
+        ctx.fillRect(x + 8,  y + h * 0.7, 8, h * 0.3 - (step ? 5 : 0));   // legs
+        ctx.fillRect(x + w * 0.55, y + h * 0.7, 8, h * 0.3 - (step ? 0 : 5));
+      },
+      obstacleS(x, y, w, h) {
+        ctx.fillStyle = ORANGE;
+        ctx.fillRect(x, y + 8, w, h - 8);
+        ctx.fillRect(x - 4, y, w + 8, 10);
+      },
+      obstacleL(x, y, w, h) {
+        ctx.fillStyle = GREEN;
+        ctx.fillRect(x, y + 10, w, h - 10);
+        ctx.fillRect(x - 4, y, w + 8, 12);
+        ctx.fillStyle = DARK;
+        ctx.fillRect(x + 8, y + 22, 4, h - 30);
+        ctx.fillRect(x + w - 12, y + 22, 4, h - 30);
+      }
+    };
+
+    /* ---------------------------- game state --------------------------- */
+    const LW = 600;               // logical width; height follows the box shape
+    let LH = 300, groundY = 254, ratio = 0.55;
+    let isOpen = false, state = 'ready', raf = 0, last = 0;
+    let t = 0, speed = 0, distance = 0, nextGap = 0, overAt = 0;
+    let hi = 0;
+    try { hi = parseInt(localStorage.getItem('np-hi') || '0', 10) || 0; } catch (e) {}
+
+    const player = { x: 50, y: 0, vy: 0, air: 0 };
+    let obstacles = [];
+
+    const GRAVITY = 1800, JUMP_V = -620;
+
+    function resetGame() {
+      t = 0; distance = 0; speed = 280; obstacles = [];
+      nextGap = 420;
+      player.y = groundY - SPRITES.playerRun.h; player.vy = 0; player.air = 0;
+    }
+
+    function fit() {
+      const boxW = gameBox.clientWidth;
+      gameBox.style.height = Math.round(ratio * boxW) + 'px';
+      const cw = canvas.clientWidth, ch = canvas.clientHeight;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(cw * dpr);
+      canvas.height = Math.round(ch * dpr);
+      const sc = cw / LW;
+      LH = ch / sc;
+      groundY = LH - 46;
+      ctx.setTransform(dpr * sc, 0, 0, dpr * sc, 0, 0);
+      if (state !== 'running') player.y = groundY - SPRITES.playerRun.h;
+    }
+
+    function openGame() {
+      if (isOpen) return;
+      const socialH = social.offsetHeight;          // keep the page height the same
+      main.classList.add('playing');
+      const boxW = gameBox.clientWidth;
+      ratio = Math.max(0.45, socialH / boxW);
+      isOpen = true;
+      state = 'ready';
+      fit();
+      resetGame();
+      canvas.focus({ preventScroll: true });
+      last = performance.now();
+      raf = requestAnimationFrame(loop);
+    }
+
+    function closeGame() {
+      if (!isOpen) return;
+      isOpen = false;
+      cancelAnimationFrame(raf);
+      main.classList.remove('playing');
+      gameBox.style.height = '';
+      boneBtn.focus({ preventScroll: true });
+    }
+
+    function onGround() { return player.y >= groundY - SPRITES.playerRun.h - 0.5; }
+
+    function action() {
+      if (!isOpen) return;
+      if (state === 'ready') {
+        state = 'running';
+        player.vy = JUMP_V;
+      } else if (state === 'running') {
+        if (onGround()) player.vy = JUMP_V;
+      } else if (state === 'over' && performance.now() - overAt > 350) {
+        resetGame();
+        state = 'running';
+        player.vy = JUMP_V;
+      }
+    }
+
+    function die() {
+      state = 'over';
+      overAt = performance.now();
+      const score = Math.floor(distance / 12);
+      if (score > hi) {
+        hi = score;
+        try { localStorage.setItem('np-hi', String(hi)); } catch (e) {}
+      }
+    }
+
+    function update(dt) {
+      t += dt;
+      if (state !== 'running') return;
+
+      speed = Math.min(280 + t * 8, 560);
+      distance += speed * dt;
+
+      // player physics
+      const floorY = groundY - SPRITES.playerRun.h;
+      player.vy += GRAVITY * dt;
+      player.y += player.vy * dt;
+      if (player.y >= floorY) { player.y = floorY; player.vy = 0; player.air = 0; }
+      else player.air += dt;
+
+      // obstacles
+      for (const o of obstacles) o.x -= speed * dt;
+      obstacles = obstacles.filter(o => o.x + o.w > -20);
+
+      nextGap -= speed * dt;
+      if (nextGap <= 0) {
+        const name = Math.random() < 0.6 ? 'obstacleS' : 'obstacleL';
+        const sp = SPRITES[name];
+        obstacles.push({ name, x: LW + 20, w: sp.w, h: sp.h });
+        const min = speed * 0.85 + 140, max = speed * 1.5 + 260;
+        nextGap = min + Math.random() * (max - min);
+      }
+
+      // collisions (slightly forgiving boxes)
+      const P = SPRITES.playerRun;
+      const px1 = player.x + P.w * HIT.x, px2 = player.x + P.w * (1 - HIT.x);
+      const py1 = player.y + P.h * HIT.top, py2 = player.y + P.h;
+      for (const o of obstacles) {
+        const ox1 = o.x + 4, ox2 = o.x + o.w - 4;
+        const oy1 = groundY - o.h + 4;
+        if (px2 > ox1 && px1 < ox2 && py2 > oy1) { die(); break; }
+      }
+    }
+
+    function pad(n) { return String(n).padStart(5, '0'); }
+
+    function draw() {
+      ctx.clearRect(0, 0, LW, LH);
+
+      // ground line with moving dashes
+      ctx.fillStyle = PINK;
+      ctx.fillRect(0, groundY, LW, 3);
+      ctx.fillStyle = 'rgba(232,51,180,0.45)';
+      const off = (distance * 1) % 40;
+      for (let x = -off; x < LW; x += 40) ctx.fillRect(x, groundY + 10, 14, 3);
+
+      for (const o of obstacles) drawSprite(o.name, o.x, groundY - o.h, t, false);
+      if (state === 'running' && !onGround()) {
+        // jump animation plays once over the airtime (crouch -> leap)
+        const f = Math.floor(player.air * SPRITES.playerJump.fps);
+        drawSprite('playerJump', player.x, player.y, t, false, f);
+      } else if (state === 'running') {
+        drawSprite('playerRun', player.x, player.y, t, true);
+      } else {
+        drawSprite('playerRun', player.x, player.y, t, false, 0);   // standing frame
+      }
+
+      // HUD
+      ctx.font = '700 16px ui-monospace, Menlo, Consolas, monospace';
+      ctx.textBaseline = 'top';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = GREEN;
+      ctx.fillText(pad(Math.floor(distance / 12)), 14, 12);
+      ctx.fillStyle = 'rgba(108,242,74,0.55)';
+      ctx.fillText('HI ' + pad(hi), 14, 34);
+
+      // messages
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      if (state === 'ready') {
+        ctx.fillStyle = GREEN;
+        ctx.font = '700 20px ui-monospace, Menlo, Consolas, monospace';
+        ctx.fillText('TAP / SPACE TO START', LW / 2, LH * 0.38);
+      } else if (state === 'over') {
+        ctx.fillStyle = PINK;
+        ctx.font = '700 30px ui-monospace, Menlo, Consolas, monospace';
+        ctx.fillText('GAME OVER', LW / 2, LH * 0.34);
+        ctx.fillStyle = GREEN;
+        ctx.font = '700 16px ui-monospace, Menlo, Consolas, monospace';
+        ctx.fillText('TAP / SPACE TO RETRY', LW / 2, LH * 0.34 + 36);
+      }
+    }
+
+    function loop(now) {
+      if (!isOpen) return;
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      update(dt);
+      draw();
+      raf = requestAnimationFrame(loop);
+    }
+
+    /* ------------------------------ events ----------------------------- */
+    boneBtn.addEventListener('click', openGame);
+    closeBtn.addEventListener('click', closeGame);
+
+    canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); action(); });
+
+    window.addEventListener('keydown', (e) => {
+      if (!isOpen) return;
+      if (e.code === 'Escape') { closeGame(); return; }
+      if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+        if (document.activeElement === closeBtn && e.code === 'Space') return; // let the button work
+        e.preventDefault();
+        if (!e.repeat) action();
+      }
+    });
+
+    window.addEventListener('resize', () => { if (isOpen) { fit(); draw(); } });
+  })();
+  </script>
 </body>
 </html>
