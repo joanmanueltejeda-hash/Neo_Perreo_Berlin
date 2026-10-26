@@ -858,7 +858,24 @@
     }
 
     /* ------------------------------ events ----------------------------- */
+    /* El Hueso sound: plays only on the very first bone click, ever (remembered per browser) */
+    let boneSoundDone = false;
+    function playBoneSoundOnce() {
+      if (boneSoundDone) return;
+      boneSoundDone = true;
+      try {
+        if (localStorage.getItem('np-bone-sound') === '1') return;
+        localStorage.setItem('np-bone-sound', '1');
+      } catch (e) {}
+      try {
+        const a = new Audio('El_Hueso.mp3');
+        const p = a.play();
+        if (p && p.catch) p.catch(() => {});
+      } catch (e) {}
+    }
+
     boneBtn.addEventListener('click', () => {
+      playBoneSoundOnce();
       boneWrap.classList.add('used');           // hint hand is no longer needed
       openGame();
     });
