@@ -858,15 +858,21 @@
     }
 
     /* ------------------------------ events ----------------------------- */
-    /* El Hueso sound: plays only on the very first bone click, ever (remembered per browser) */
+    /* El Hueso sound: plays only on the first bone click of a session (survives reloads, resets in a new tab/visit) */
     let boneSoundDone = false;
+    function boneSoundAlreadyPlayed() {
+      try { if (sessionStorage.getItem('np-bone-sound') === '1') return true; } catch (e) {}
+      return (window.name || '').indexOf('np-bone-sound') !== -1;   // fallback if storage is blocked
+    }
+    function markBoneSoundPlayed() {
+      try { sessionStorage.setItem('np-bone-sound', '1'); } catch (e) {}
+      if ((window.name || '').indexOf('np-bone-sound') === -1) window.name += ' np-bone-sound';
+    }
     function playBoneSoundOnce() {
       if (boneSoundDone) return;
       boneSoundDone = true;
-      try {
-        if (localStorage.getItem('np-bone-sound') === '1') return;
-        localStorage.setItem('np-bone-sound', '1');
-      } catch (e) {}
+      if (boneSoundAlreadyPlayed()) return;
+      markBoneSoundPlayed();
       try {
         const a = new Audio('El_Hueso.mp3');
         const p = a.play();
