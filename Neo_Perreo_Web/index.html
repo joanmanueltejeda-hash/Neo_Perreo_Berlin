@@ -210,7 +210,7 @@
       width: calc(var(--w) * 0.3375);
     }
 
-    /* Pointing hand: in after 2 s, visible 2 s, out for 5 s, repeat - until the bone is clicked */
+    /* Pointing hand: in after 1.5 s, visible 2 s, out for 1.5 s, repeat - until the bone is clicked */
     .hint-hand {
       position: absolute;
       left: 56%;
@@ -888,7 +888,7 @@
       });
       document.getElementById('hint-hand').innerHTML =
         '<svg viewBox="0 0 13 14" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">' + rects + '</svg>';
-      const FIRST_DELAY = 2000, VISIBLE_MS = 2000, HIDDEN_MS = 5000;
+      const FIRST_DELAY = 1500, VISIBLE_MS = 2000, HIDDEN_MS = 1500;
       function cycle(show) {
         if (boneWrap.classList.contains('used')) return;
         if (show) {
