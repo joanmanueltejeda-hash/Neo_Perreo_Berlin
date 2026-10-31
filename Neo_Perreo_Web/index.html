@@ -329,6 +329,34 @@
     .game-close:hover { background: #e833b4; color: #0a0a0a; }
     .game-close:focus-visible { outline: 2px solid #6cf24a; outline-offset: 2px; }
 
+    /* "Tickets coming soon" pop-up */
+    #tickets-dialog {
+      margin: auto;
+      width: min(86vw, 360px);
+      padding: 28px 24px 22px;
+      border: 3px solid #e833b4;
+      border-radius: 16px;
+      background: #0a0a0a;
+      color: #f6efe0;
+      text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      box-shadow: 0 0 40px rgba(232, 51, 180, 0.35);
+    }
+    #tickets-dialog::backdrop { background: rgba(0, 0, 0, 0.75); }
+    #tickets-dialog h2 { font-size: 1.5rem; line-height: 1.2; margin-bottom: 10px; color: #fff; }
+    #tickets-dialog p { font-size: 1rem; line-height: 1.5; color: #cfcfcf; margin-bottom: 20px; }
+    #tickets-dialog .dlg-close {
+      font: 700 15px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      padding: 11px 26px;
+      border-radius: 999px;
+      border: 2px solid #e833b4;
+      background: #e833b4;
+      color: #0a0a0a;
+      cursor: pointer;
+    }
+    #tickets-dialog .dlg-close:hover { background: transparent; color: #e833b4; }
+    #tickets-dialog .dlg-close:focus-visible { outline: 2px solid #6cf24a; outline-offset: 3px; }
+
     /* Footer */
     footer {
       position: relative;
@@ -378,10 +406,12 @@
   </header>
 
   <main>
-    <!-- TODO: swap in the real ticket platform link when ready -->
-    <a class="tile wide" href="https://www.ticketmaster.de" target="_blank" rel="noopener">
+    <!-- TODO: when the ticket shop is ready, replace this button with:
+         <a class="tile wide" href="TICKET-LINK" target="_blank" rel="noopener"><img src="Buy_Tickets_Box.png" alt="Buy Tickets"></a>
+         and delete the #tickets-dialog and its script. -->
+    <button class="tile wide" id="tickets-btn" type="button" aria-haspopup="dialog">
       <img src="Buy_Tickets_Box.png" alt="Buy Tickets">
-    </a>
+    </button>
 
     <div class="social" id="social">
       
@@ -925,6 +955,31 @@
       }
       setTimeout(() => cycle(true), FIRST_DELAY);
     })();
+  })();
+  </script>
+
+  <dialog id="tickets-dialog" aria-labelledby="tickets-title">
+    <h2 id="tickets-title">Tickets coming soon</h2>
+    <p>Ticket sales haven&rsquo;t started yet. Follow us on Instagram or TikTok to be the first to know.</p>
+    <button class="dlg-close" id="tickets-close" type="button">Got it</button>
+  </dialog>
+
+  <script>
+  (() => {
+    const btn = document.getElementById('tickets-btn');
+    const dlg = document.getElementById('tickets-dialog');
+    const close = document.getElementById('tickets-close');
+    if (!btn || !dlg) return;
+    btn.addEventListener('click', () => {
+      if (typeof dlg.showModal === 'function') dlg.showModal();
+      else dlg.setAttribute('open', '');
+    });
+    close.addEventListener('click', () => {
+      if (typeof dlg.close === 'function') dlg.close();
+      else dlg.removeAttribute('open');
+    });
+    // click on the dark backdrop closes it too
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
   })();
   </script>
 </body>
