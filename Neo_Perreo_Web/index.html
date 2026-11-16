@@ -456,6 +456,19 @@
     main { padding-top: calc(var(--G) * 1.15 - 0.5px); }
     .grp-offer { margin-top: calc(var(--G) * 1.15 + 0.5px + 5px); }   /* group 2 moved down 5px */
     .ladder { margin-bottom: -5px; }   /* pink bar -> group 1 = same gap as 1 -> 2 -> 3 */
+
+    /* ticket texts in regular case */
+    .ladder, .eb-note { text-transform: none; }
+    .step .lbl, .step .tag { letter-spacing: 0.03em; }
+    .eb-note { letter-spacing: 0.02em; }
+    /* a touch bigger for regular case */
+    .step .lbl { font-size: calc(var(--w) * 0.0295); }
+    .step .tag { font-size: calc(var(--w) * 0.0262); }
+    .eb-note   { font-size: calc(var(--w) * 0.0352); }
+    /* prices 10% smaller, labels a hair further away from them */
+    .step .pr     { font-size: calc(var(--w) * 0.036); }
+    .step.now .pr { font-size: calc(var(--w) * 0.0522); }
+    .step { gap: calc(var(--w) * 0.0105); }
   </style>
 </head>
 <body>
@@ -477,9 +490,9 @@
       </div>
       <div class="grp grp-offer">
         <div class="ladder" id="ladder">
-          <div class="step past"><span class="lbl">FIRST DROP</span><span class="pr">9.99 €</span><span class="tag">SOLD OUT</span></div>
-          <div class="step now" id="step-eb"><span class="lbl">EARLY BIRD</span><span class="pr" id="eb-price"></span><span class="tag">ON SALE</span></div>
-          <div class="step" id="step-std"><span class="lbl">STANDARD</span><span class="pr" id="std-price"></span><span class="tag" id="std-tag"></span></div>
+          <div class="step past"><span class="lbl">First drop</span><span class="pr">9.99 €</span><span class="tag">Sold out</span></div>
+          <div class="step now" id="step-eb"><span class="lbl">Early bird</span><span class="pr" id="eb-price"></span><span class="tag">On sale</span></div>
+          <div class="step" id="step-std"><span class="lbl">Standard</span><span class="pr" id="std-price"></span><span class="tag" id="std-tag"></span></div>
         </div>
         <div class="grp grp-buy">
         <a class="tile wide" href="https://eventfrog.de/de/p/partys/latin-salsa-bachata/neo-perreo-berlin-berlin-7522346475134688124.html" target="_blank" rel="noopener">
@@ -1057,7 +1070,7 @@
     const end = new Date(NP.ebEnds);
     const next = new Date(end.getTime() + 60000);
     const dd = d => String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0');
-    document.getElementById('std-tag').textContent = 'FROM ' + dd(next);
+    document.getElementById('std-tag').textContent = 'From ' + dd(next);
     const note = document.getElementById('eb-note');
     const two = n => String(n).padStart(2, '0');
     function tick() {
@@ -1065,8 +1078,8 @@
       if (ms <= 0) {
         // early bird over: standard becomes the active step
         const eb = document.getElementById('step-eb'), st = document.getElementById('step-std');
-        eb.className = 'step past'; eb.querySelector('.tag').textContent = 'OVER';
-        st.className = 'step now'; st.querySelector('.tag').textContent = 'ON SALE';
+        eb.className = 'step past'; eb.querySelector('.tag').textContent = 'Over';
+        st.className = 'step now'; st.querySelector('.tag').textContent = 'On sale';
         note.textContent = '';
         return false;
       }
@@ -1074,7 +1087,7 @@
       const h = Math.floor(ms / 36e5);  ms -= h * 36e5;
       const m = Math.floor(ms / 6e4);   ms -= m * 6e4;
       const s = Math.floor(ms / 1e3);
-      note.innerHTML = 'EARLY BIRD ENDS IN <b>' + (d ? d + 'D ' : '') + two(h) + ':' + two(m) + ':' + two(s) + '</b>';
+      note.innerHTML = 'Early bird ends in <b>' + (d ? d + 'd ' : '') + two(h) + ':' + two(m) + ':' + two(s) + '</b>';
       return true;
     }
     if (tick()) { const iv = setInterval(() => { if (!tick()) clearInterval(iv); }, 1000); }
