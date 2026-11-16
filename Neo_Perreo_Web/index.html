@@ -583,7 +583,8 @@
     venue:    'PRIVAT CLUB',
     ebPrice:  '12.99 €',                    // Early Bird on Eventfrog
     regPrice: '14.99 €',                    // Standard on Eventfrog (price after early bird)
-    ebEnds:   '2026-11-30T23:59:00+01:00'   // countdown end = when early bird stops on Eventfrog
+    ebEnds:   '2026-11-30T23:59:00+01:00',  // countdown end = when early bird stops on Eventfrog
+    countdownDays: 4                        // live countdown only in the last 4 days; before that a plain "Early bird ends 30.11"
   };
   </script>
   <script>
@@ -1105,10 +1106,14 @@
     document.getElementById('std-price').textContent = NP.regPrice;
     const end = new Date(NP.ebEnds);
     const next = new Date(end.getTime() + 60000);
-    const dd = d => String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0');
+    const dd = d => {   // DD.MM in Berlin time, whatever the phone is set to
+      try { return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' }).replace(/\.$/, ''); }
+      catch (e) { return String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0'); }
+    };
     document.getElementById('std-tag').textContent = 'From ' + dd(next);
     const note = document.getElementById('eb-note');
     const two = n => String(n).padStart(2, '0');
+    let lastNote = '';
     function tick() {
       let ms = end.getTime() - Date.now();
       if (ms <= 0) {
@@ -1123,7 +1128,11 @@
       const h = Math.floor(ms / 36e5);  ms -= h * 36e5;
       const m = Math.floor(ms / 6e4);   ms -= m * 6e4;
       const s = Math.floor(ms / 1e3);
-      note.innerHTML = 'Early bird ends in <b>' + (d ? d + 'd ' : '') + two(h) + ':' + two(m) + ':' + two(s) + '</b>';
+      // far from the deadline: plain date line; last NP.countdownDays days: live countdown
+      const html = (end.getTime() - Date.now() > NP.countdownDays * 864e5)
+        ? 'Early bird ends <b>' + dd(end) + '</b>'
+        : 'Early bird ends in <b>' + (d ? d + 'd ' : '') + two(h) + ':' + two(m) + ':' + two(s) + '</b>';
+      if (html !== lastNote) { note.innerHTML = html; lastNote = html; }
       return true;
     }
     if (tick()) { const iv = setInterval(() => { if (!tick()) clearInterval(iv); }, 1000); }
