@@ -78,13 +78,13 @@
     /* colour only on the outer ~27% on each side, fading into the dark middle */
     .pattern .a .m {
       background: linear-gradient(90deg,
-        var(--pink) 0%, rgba(255,16,184,0.55) 12%, rgba(255,16,184,0) 27%,
-        rgba(255,90,20,0) 73%, rgba(255,90,20,0.55) 88%, var(--orange) 100%);
+        var(--pink) 0%, rgba(255,16,184,0.55) 4%, rgba(255,16,184,0) 9%,
+        rgba(255,90,20,0) 91.0%, rgba(255,90,20,0.55) 96.0%, var(--orange) 100%);
     }
     .pattern .b .m {
       background: linear-gradient(90deg,
-        var(--orange) 0%, rgba(255,90,20,0.55) 12%, rgba(255,90,20,0) 27%,
-        rgba(255,16,184,0) 73%, rgba(255,16,184,0.55) 88%, var(--pink) 100%);
+        var(--orange) 0%, rgba(255,90,20,0.55) 4%, rgba(255,90,20,0) 9%,
+        rgba(255,16,184,0) 91.0%, rgba(255,16,184,0.55) 96.0%, var(--pink) 100%);
     }
 
     .pattern .glow {
@@ -472,6 +472,38 @@
 
     /* Reggaeton Sucio line */
     .sucio { display: block; width: calc(var(--w) * 0.60 * 0.99858); height: auto; color: #3ef91e; margin: -1px 0 3.5px; }  /* same visible width as Fiesta Latina */
+
+    /* v2h: logo + group 1 together in the header */
+    header {
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: calc(var(--w) * 0.06) 0 calc(var(--w) * 0.07);
+      min-height: 0;
+      gap: calc(var(--w) * 0.045);
+    }
+    .logo { width: calc(var(--w) * 0.30); }
+    /* taller header: pattern scaled up so it covers the whole band */
+    .pattern .m { -webkit-mask-size: 140% auto; mask-size: 140% auto;
+                  -webkit-mask-position: 50% calc(var(--w) * -0.098); mask-position: 50% calc(var(--w) * -0.098); }
+    header .grp-info {
+      position: relative; z-index: 1;
+      width: calc(var(--w) * 0.84);
+      font-family: "FuturaPT-ExtraBold", "Futura PT", Futura, "Century Gothic", "Trebuchet MS", sans-serif;
+      font-weight: 800; text-transform: uppercase; text-align: center; line-height: 1.15;
+    }
+    .grp-offer { margin-top: 0; }
+    main { padding-top: calc(var(--G) * 1.15 + 5px); }
+
+    /* date + line-up rows: smaller; a script below fits both to the width of Fiesta Latina */
+    header .event-line { font-size: calc(var(--w) * 0.031); letter-spacing: 0.3em; }
+    header .djs { font-size: calc(var(--w) * 0.0365); margin-top: calc(-0.17em + 5px); }
+
+    /* logo closer to the top edge and to the title (5px each) */
+    header { padding-top: calc(var(--w) * 0.06 - 5px); gap: calc(var(--w) * 0.045 - 5px); }
+    /* header colour: long, soft fade into the black middle (ends where Fiesta Latina starts) */
+    .pattern .a .m { background: linear-gradient(90deg, rgba(255,16,184,1) 0%, rgba(255,16,184,0.72) 2.4%, rgba(255,16,184,0.48) 4.8%, rgba(255,16,184,0.3) 7.2%, rgba(255,16,184,0.17) 9.6%, rgba(255,16,184,0.08) 12%, rgba(255,16,184,0.03) 14%, rgba(255,16,184,0) 16%, rgba(255,90,20,0) 84%, rgba(255,90,20,0.03) 86%, rgba(255,90,20,0.08) 88%, rgba(255,90,20,0.17) 90.4%, rgba(255,90,20,0.3) 92.8%, rgba(255,90,20,0.48) 95.2%, rgba(255,90,20,0.72) 97.6%, rgba(255,90,20,1) 100%); }
+    .pattern .b .m { background: linear-gradient(90deg, rgba(255,90,20,1) 0%, rgba(255,90,20,0.72) 2.4%, rgba(255,90,20,0.48) 4.8%, rgba(255,90,20,0.3) 7.2%, rgba(255,90,20,0.17) 9.6%, rgba(255,90,20,0.08) 12%, rgba(255,90,20,0.03) 14%, rgba(255,90,20,0) 16%, rgba(255,16,184,0) 84%, rgba(255,16,184,0.03) 86%, rgba(255,16,184,0.08) 88%, rgba(255,16,184,0.17) 90.4%, rgba(255,16,184,0.3) 92.8%, rgba(255,16,184,0.48) 95.2%, rgba(255,16,184,0.72) 97.6%, rgba(255,16,184,1) 100%); }
   </style>
 </head>
 <body>
@@ -482,16 +514,16 @@
       <div class="layer b"><div class="glow"><div class="m"></div></div><div class="m"></div></div>
     </div>
     <img class="logo" src="NP_Logo.png" alt="Neo Perreo Berlin">
+    <div class="grp grp-info">
+        <svg class="fiesta" xmlns="http://www.w3.org/2000/svg" viewBox="40 -1810 14070 2220" role="img" aria-label="Fiesta Latina"><g transform="scale(1,-1)" fill="currentColor"><path transform="translate(0,0)" d="M450 500V100L50 -300V1400H1250V1000H450V900H1250Z"/><path transform="translate(1300,0)" d="M450 1400V0L50 -400V1400Z"/><path transform="translate(1800,0)" d="M1250 900 450 500V400H1250V0H50V1400H1250V1000H450V900Z"/><path transform="translate(3100,0)" d="M1100 1000H450V900H1250V0H50L200 400H850V500H50V1400H1250Z"/><path transform="translate(4400,0)" d="M850 1000V0L450 -400V1000H50V1400H1250L1100 1000Z"/><path transform="translate(5700,0)" d="M600 700 300 0H-100L600 1700L1300 0H900Z"/><path transform="translate(7500,0)" d="M50 0V1400H450V400H950L800 0Z"/><path transform="translate(8500,0)" d="M600 700 300 0H-100L600 1700L1300 0H900Z"/><path transform="translate(9700,0)" d="M850 1000V0L450 -400V1000H50V1400H1250L1100 1000Z"/><path transform="translate(11000,0)" d="M450 1400V0L50 -400V1400Z"/><path transform="translate(11500,0)" d="M450 600V0L50 -400V1800L850 700V1400H1250V-400Z"/><path transform="translate(12800,0)" d="M600 700 300 0H-100L600 1700L1300 0H900Z"/></g></svg>
+        <svg class="sucio" xmlns="http://www.w3.org/2000/svg" viewBox="0 -187.5 25662.4 1875.0" role="img" aria-label="Reggaeton Sucio"><g fill="currentColor"><g transform="translate(0,-187.5) scale(12.389322056297079)"><polygon points="32.02 63.76 16.01 89.32 0 63.76 16.01 38.22 32.02 63.76"/><polygon points="47.17 51.12 31.16 25.56 47.17 0 63.2 25.56 47.17 51.12"/><polygon points="96 51.12 79.99 25.56 96 0 112.03 25.56 96 51.12"/><polygon points="92.23 69.03 123.22 120.05 105.15 151.34 70.79 143.02 36.41 151.34 18.35 120.05 50.29 69.03 92.23 69.03"/><polygon points="143.77 63.76 127.77 89.32 111.76 63.76 127.77 38.22 143.77 63.76"/></g><g transform="translate(2606.212832033831,0)"><g transform="translate(-50,1500) scale(1,-1)"><path transform="translate(0,0)" d="M1550 0H1050L650 400V0H250V900H650V800H1050Q1150 800 1150 900Q1150 1000 1050 1000H50L250 1400H1050Q1550 1400 1550 900Q1550 400 1150 400Z"/><path transform="translate(1600,0)" d="M1350 1000H50L250 1400H1550ZM250 900H1550L1350 500H650V400H1550L1350 0H250Z"/><path transform="translate(3200,0)" d="M950 900H1350V0H650Q50 0 50 700Q50 1400 650 1400H1550L1350 1000H650Q450 1000 450 700Q450 400 650 400H950V500H750Z"/><path transform="translate(4800,0)" d="M950 900H1350V0H650Q50 0 50 700Q50 1400 650 1400H1550L1350 1000H650Q450 1000 450 700Q450 400 650 400H950V500H750Z"/><path transform="translate(6400,0)" d="M50 0 800 1500 1550 0H1100L800 650L500 0Z"/><path transform="translate(8000,0)" d="M1350 1000H50L250 1400H1550ZM250 900H1550L1350 500H650V400H1550L1350 0H250Z"/><path transform="translate(9600,0)" d="M450 1000H50L250 1400H1250L1050 1000H850V0H450Z"/><path transform="translate(10900,0)" d="M750 0Q460 0 255.0 205.0Q50 410 50 700Q50 990 255.0 1195.0Q460 1400 750 1400Q1040 1400 1245.0 1195.0Q1450 990 1450 700Q1450 410 1245.0 205.0Q1040 0 750 0ZM1050 700Q1050 824 962.0 912.0Q874 1000 750 1000Q626 1000 538.0 912.0Q450 824 450 700Q450 576 538.0 488.0Q626 400 750 400Q874 400 962.0 488.0Q1050 576 1050 700Z"/><path transform="translate(12400,0)" d="M950 750V1400H1350V-100L450 600V0H50V1500Z"/><path transform="translate(14400,0)" d="M550 500Q50 500 50 954Q50 1400 550 1400H1350L1150 1000H550Q450 1000 450 954Q450 900 550 900H850Q1350 900 1350 454Q1350 0 850 0H50L250 400H850Q950 400 950 454Q950 500 850 500Z"/><path transform="translate(15800,0)" d="M50 700V1400H450V700Q450 400 650 400Q850 400 850 700V1400H1250V700Q1250 0 650 0Q50 0 50 700Z"/><path transform="translate(17100,0)" d="M1245 205Q1040 0 750 0Q460 0 255.0 205.0Q50 410 50 700Q50 990 255.0 1195.0Q460 1400 750 1400Q1040 1400 1245 1195Q1348 1092 1400 967L1035 796Q1014 860 962 912Q874 1000 750 1000Q626 1000 538.0 912.0Q450 824 450 700Q450 576 538.0 488.0Q626 400 750 400Q874 400 962 488Q1010 536 1032 596L1399 433Q1348 308 1245 205Z"/><path transform="translate(18550,0)" d="M450 1400V0H50V1400Z"/><path transform="translate(19050,0)" d="M750 0Q460 0 255.0 205.0Q50 410 50 700Q50 990 255.0 1195.0Q460 1400 750 1400Q1040 1400 1245.0 1195.0Q1450 990 1450 700Q1450 410 1245.0 205.0Q1040 0 750 0ZM1050 700Q1050 824 962.0 912.0Q874 1000 750 1000Q626 1000 538.0 912.0Q450 824 450 700Q450 576 538.0 488.0Q626 400 750 400Q874 400 962.0 488.0Q1050 576 1050 700Z"/></g></g><g transform="translate(23881.21283203383,-187.5) scale(12.389322056297079)"><polygon points="32.02 63.76 16.01 89.32 0 63.76 16.01 38.22 32.02 63.76"/><polygon points="47.17 51.12 31.16 25.56 47.17 0 63.2 25.56 47.17 51.12"/><polygon points="96 51.12 79.99 25.56 96 0 112.03 25.56 96 51.12"/><polygon points="92.23 69.03 123.22 120.05 105.15 151.34 70.79 143.02 36.41 151.34 18.35 120.05 50.29 69.03 92.23 69.03"/><polygon points="143.77 63.76 127.77 89.32 111.76 63.76 127.77 38.22 143.77 63.76"/></g></g></svg>
+        <div class="event-line"><span id="np-date"></span><span class="dot">·</span><span id="np-venue"></span></div>
+        <div class="djs"><span class="c-pink">HOLY MAMI</span><span class="dot">·</span><span class="c-green">LA CRUZ</span><span class="dot">·</span><span class="c-orange">FUEGA</span></div>
+      </div>
   </header>
 
   <main>
     <div class="cta">
-      <div class="grp grp-info">
-        <svg class="fiesta" xmlns="http://www.w3.org/2000/svg" viewBox="40 -1810 14070 2220" role="img" aria-label="Fiesta Latina"><g transform="scale(1,-1)" fill="currentColor"><path transform="translate(0,0)" d="M450 500V100L50 -300V1400H1250V1000H450V900H1250Z"/><path transform="translate(1300,0)" d="M450 1400V0L50 -400V1400Z"/><path transform="translate(1800,0)" d="M1250 900 450 500V400H1250V0H50V1400H1250V1000H450V900Z"/><path transform="translate(3100,0)" d="M1100 1000H450V900H1250V0H50L200 400H850V500H50V1400H1250Z"/><path transform="translate(4400,0)" d="M850 1000V0L450 -400V1000H50V1400H1250L1100 1000Z"/><path transform="translate(5700,0)" d="M600 700 300 0H-100L600 1700L1300 0H900Z"/><path transform="translate(7500,0)" d="M50 0V1400H450V400H950L800 0Z"/><path transform="translate(8500,0)" d="M600 700 300 0H-100L600 1700L1300 0H900Z"/><path transform="translate(9700,0)" d="M850 1000V0L450 -400V1000H50V1400H1250L1100 1000Z"/><path transform="translate(11000,0)" d="M450 1400V0L50 -400V1400Z"/><path transform="translate(11500,0)" d="M450 600V0L50 -400V1800L850 700V1400H1250V-400Z"/><path transform="translate(12800,0)" d="M600 700 300 0H-100L600 1700L1300 0H900Z"/></g></svg>
-        <svg class="sucio" xmlns="http://www.w3.org/2000/svg" viewBox="0 -187.5 25662.4 1875.0" role="img" aria-label="Reggaeton Sucio"><g fill="currentColor"><g transform="translate(0,-187.5) scale(12.389322056297079)"><polygon points="32.02 63.76 16.01 89.32 0 63.76 16.01 38.22 32.02 63.76"/><polygon points="47.17 51.12 31.16 25.56 47.17 0 63.2 25.56 47.17 51.12"/><polygon points="96 51.12 79.99 25.56 96 0 112.03 25.56 96 51.12"/><polygon points="92.23 69.03 123.22 120.05 105.15 151.34 70.79 143.02 36.41 151.34 18.35 120.05 50.29 69.03 92.23 69.03"/><polygon points="143.77 63.76 127.77 89.32 111.76 63.76 127.77 38.22 143.77 63.76"/></g><g transform="translate(2606.212832033831,0)"><g transform="translate(-50,1500) scale(1,-1)"><path transform="translate(0,0)" d="M1550 0H1050L650 400V0H250V900H650V800H1050Q1150 800 1150 900Q1150 1000 1050 1000H50L250 1400H1050Q1550 1400 1550 900Q1550 400 1150 400Z"/><path transform="translate(1600,0)" d="M1350 1000H50L250 1400H1550ZM250 900H1550L1350 500H650V400H1550L1350 0H250Z"/><path transform="translate(3200,0)" d="M950 900H1350V0H650Q50 0 50 700Q50 1400 650 1400H1550L1350 1000H650Q450 1000 450 700Q450 400 650 400H950V500H750Z"/><path transform="translate(4800,0)" d="M950 900H1350V0H650Q50 0 50 700Q50 1400 650 1400H1550L1350 1000H650Q450 1000 450 700Q450 400 650 400H950V500H750Z"/><path transform="translate(6400,0)" d="M50 0 800 1500 1550 0H1100L800 650L500 0Z"/><path transform="translate(8000,0)" d="M1350 1000H50L250 1400H1550ZM250 900H1550L1350 500H650V400H1550L1350 0H250Z"/><path transform="translate(9600,0)" d="M450 1000H50L250 1400H1250L1050 1000H850V0H450Z"/><path transform="translate(10900,0)" d="M750 0Q460 0 255.0 205.0Q50 410 50 700Q50 990 255.0 1195.0Q460 1400 750 1400Q1040 1400 1245.0 1195.0Q1450 990 1450 700Q1450 410 1245.0 205.0Q1040 0 750 0ZM1050 700Q1050 824 962.0 912.0Q874 1000 750 1000Q626 1000 538.0 912.0Q450 824 450 700Q450 576 538.0 488.0Q626 400 750 400Q874 400 962.0 488.0Q1050 576 1050 700Z"/><path transform="translate(12400,0)" d="M950 750V1400H1350V-100L450 600V0H50V1500Z"/><path transform="translate(14400,0)" d="M550 500Q50 500 50 954Q50 1400 550 1400H1350L1150 1000H550Q450 1000 450 954Q450 900 550 900H850Q1350 900 1350 454Q1350 0 850 0H50L250 400H850Q950 400 950 454Q950 500 850 500Z"/><path transform="translate(15800,0)" d="M50 700V1400H450V700Q450 400 650 400Q850 400 850 700V1400H1250V700Q1250 0 650 0Q50 0 50 700Z"/><path transform="translate(17100,0)" d="M1245 205Q1040 0 750 0Q460 0 255.0 205.0Q50 410 50 700Q50 990 255.0 1195.0Q460 1400 750 1400Q1040 1400 1245 1195Q1348 1092 1400 967L1035 796Q1014 860 962 912Q874 1000 750 1000Q626 1000 538.0 912.0Q450 824 450 700Q450 576 538.0 488.0Q626 400 750 400Q874 400 962 488Q1010 536 1032 596L1399 433Q1348 308 1245 205Z"/><path transform="translate(18550,0)" d="M450 1400V0H50V1400Z"/><path transform="translate(19050,0)" d="M750 0Q460 0 255.0 205.0Q50 410 50 700Q50 990 255.0 1195.0Q460 1400 750 1400Q1040 1400 1245.0 1195.0Q1450 990 1450 700Q1450 410 1245.0 205.0Q1040 0 750 0ZM1050 700Q1050 824 962.0 912.0Q874 1000 750 1000Q626 1000 538.0 912.0Q450 824 450 700Q450 576 538.0 488.0Q626 400 750 400Q874 400 962.0 488.0Q1050 576 1050 700Z"/></g></g><g transform="translate(23881.21283203383,-187.5) scale(12.389322056297079)"><polygon points="32.02 63.76 16.01 89.32 0 63.76 16.01 38.22 32.02 63.76"/><polygon points="47.17 51.12 31.16 25.56 47.17 0 63.2 25.56 47.17 51.12"/><polygon points="96 51.12 79.99 25.56 96 0 112.03 25.56 96 51.12"/><polygon points="92.23 69.03 123.22 120.05 105.15 151.34 70.79 143.02 36.41 151.34 18.35 120.05 50.29 69.03 92.23 69.03"/><polygon points="143.77 63.76 127.77 89.32 111.76 63.76 127.77 38.22 143.77 63.76"/></g></g></svg>
-        <div class="event-line"><span id="np-date"></span><span class="dot">·</span><span id="np-venue"></span><span class="dot">·</span>BERLIN</div>
-        <div class="djs"><span class="c-pink">HOLY MAMI</span><span class="dot">·</span><span class="c-green">LA CRUZ</span><span class="dot">·</span><span class="c-orange">FUEGA</span></div>
-      </div>
       <div class="grp grp-offer">
         <div class="ladder" id="ladder">
           <div class="step past"><span class="lbl">First drop</span><span class="pr">9.99 €</span><span class="tag">Sold out</span></div>
@@ -1095,6 +1127,41 @@
       return true;
     }
     if (tick()) { const iv = setInterval(() => { if (!tick()) clearInterval(iv); }, 1000); }
+  })();
+  </script>
+  <script>
+  /* Fit the date row (by letter spacing) and the line-up row (by font size)
+     to the visible width of FIESTA LATINA, whatever font the phone uses. */
+  (() => {
+    const fiesta = document.querySelector('header .fiesta');
+    const dateRow = document.querySelector('header .event-line');
+    const djs = document.querySelector('header .djs');
+    if (!fiesta || !dateRow || !djs) return;
+    const ls = el => parseFloat(getComputedStyle(el).letterSpacing) || 0;
+    function inkW(el) {
+      const r = document.createRange(); r.selectNodeContents(el);
+      return r.getBoundingClientRect().width - ls(el);      // last letter's spacing is not visible
+    }
+    function fit() {
+      const target = fiesta.getBoundingClientRect().width * 0.99858;
+      if (!target) return;
+      djs.style.fontSize = ''; djs.style.paddingLeft = '';
+      let fs = parseFloat(getComputedStyle(djs).fontSize);
+      for (let i = 0; i < 4; i++) { fs *= target / inkW(djs); djs.style.fontSize = fs + 'px'; }
+      djs.style.paddingLeft = ls(djs) + 'px';                // keeps it optically centred
+      dateRow.style.paddingLeft = '';
+      let lo = 0, hi = 1.2;
+      for (let i = 0; i < 22; i++) {
+        const mid = (lo + hi) / 2;
+        dateRow.style.letterSpacing = mid + 'em';
+        if (inkW(dateRow) < target) lo = mid; else hi = mid;
+      }
+      dateRow.style.paddingLeft = ls(dateRow) + 'px';
+    }
+    fit();
+    window.addEventListener('resize', fit);
+    window.addEventListener('load', fit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   })();
   </script>
 
